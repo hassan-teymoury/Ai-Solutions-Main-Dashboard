@@ -10,7 +10,7 @@ import { SignupForm } from "@/components/auth/signup-form";
 
 export default function HomePage() {
   const [isLogin, setIsLogin] = useState(true);
-  const { isLoading, user, access_token } = useAuthStore();
+  const { isLoading, user, access_token, hydrated } = useAuthStore();
   const { theme } = useThemeStore();
   const router = useRouter();
 
@@ -30,13 +30,14 @@ export default function HomePage() {
   }, [theme]);
 
   useEffect(() => {
-    debugger
-    if (!isLoading && user && access_token) {
+    // Only redirect if store is hydrated and we have valid auth data
+    if (hydrated && !isLoading && user && access_token) {
       router.push("/dashboard");
     }
-  }, [isLoading, router, user]);
+  }, [hydrated, isLoading, user, access_token, router]);
 
-  if (isLoading) {
+  // Show loading while store is hydrating
+  if (!hydrated || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary via-background to-secondary/50 dark:from-background dark:via-background dark:to-muted">
         <div className="text-center">
@@ -49,6 +50,7 @@ export default function HomePage() {
     );
   }
 
+  // Don't render anything if user is authenticated (will redirect)
   if (user && access_token) {
     return null;
   }

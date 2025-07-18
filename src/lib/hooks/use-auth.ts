@@ -33,14 +33,18 @@ export function useLogin() {
       return response;
     },
     onSuccess: (data) => {
-
+      // Update store with user data
       setUser({...data.user, service: 'dashboard'});
       setAccessToken(data.access_token);
       setRefreshToken(data.refresh_token);
-      setServiceTokens(data.service_tokens);
+      setServiceTokens(data.service_tokens || []);
 
+      // Invalidate and refetch user-related queries
       queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+    },
+    onError: (error) => {
+      console.error("Login error:", error);
     },
   });
 }

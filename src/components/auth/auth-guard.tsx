@@ -7,7 +7,7 @@ import { RefreshCw } from "lucide-react";
 import { obwbAuthAPI } from "@/lib/api/obwb/auth";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { setUsers, setUser, userInServices } = useAuthStore();
+  const { setUsers, setUser, userInServices, hydrated } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
   const router = useRouter();
@@ -20,37 +20,75 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let ignore = false;
+    
     async function validate() {
       try {
+        // Wait for store to be hydrated
+        if (!hydrated) {
+          return;
+        }
+
         const authStorage = JSON.parse(
           localStorage.getItem("auth-storage") || "{}"
         );
         const token = authStorage?.state?.access_token;
-        if (!token) throw new Error("No token");
-        const userData = await authAPI.me(token);
-        const obwbUserData = await obwbAuthAPI.me(token);
+        
+        if (!token) {
+          if (!ignore) {
+            setLoading(false);
+            router.replace("/");
+          }
+          return;
+        }
+
+        // Validate main dashboard token first
+        try {
+          const userData = await authAPI.me(token);
+          if (!ignore) {
+            setUser({ ...userData, service: "dashboard" });
+          }
+        } catch (error) {
+          console.error("Dashboard auth validation failed:", error);
+          if (!ignore) {
+            setLoading(false);
+            router.replace("/");
+          }
+          return;
+        }
+
+        // Try to validate OBWB token (optional - don't fail if this fails)
+        try {
+          const obwbUserData = await obwbAuthAPI.me(token);
+          if (!ignore) {
+            setUsers({ ...obwbUserData, service: "obwb" });
+          }
+        } catch (error) {
+          console.warn("OBWB auth validation failed (optional):", error);
+          // Don't fail the entire validation for OBWB
+        }
 
         if (!ignore) {
-          setUser({ ...userData, service: "dashboard" });
-          setUsers({ ...obwbUserData, service: "obwb" });
           setLoading(false);
         }
-      } catch {
+      } catch (error) {
+        console.error("Auth validation error:", error);
         if (!ignore) {
           setLoading(false);
           router.replace("/");
         }
       }
     }
+
     validate();
+    
     return () => {
       ignore = true;
     };
-  }, [router, setUsers, setUser]);
+  }, [router, setUsers, setUser, hydrated]);
 
   // After loading, check service access based on pathname
   useEffect(() => {
-    if (!loading) {
+    if (!loading && hydrated) {
       if (pathname.includes("Obwb") && !hasServiceAccess("obwb")) {
         setAccessDenied(true);
       } else if (pathname.includes("Optical") && !hasServiceAccess("optical")) {
@@ -59,9 +97,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         setAccessDenied(false);
       }
     }
-  }, [pathname, loading, userInServices]);
+  }, [pathname, loading, userInServices, hydrated]);
 
-  if (loading) {
+  if (loading || !hydrated) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">

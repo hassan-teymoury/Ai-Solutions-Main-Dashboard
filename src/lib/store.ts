@@ -19,11 +19,13 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => {
         localStorage.removeItem('auth-storage');
         set({
-          userInServices: [],
+          user: null,
+          userInServices: null,
           access_token: null,
           refresh_token: null,
           service_tokens: [],
           isLoading: false,
+          hydrated: true,
         });
       },
 
@@ -32,13 +34,13 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       setUsers: (user: User) => set((state) => {
-        const existingUserIndex = state.userInServices?.findIndex(user => user.service === user.service);
+        const existingUserIndex = state.userInServices?.findIndex(u => u.service === user.service);
 
         if (existingUserIndex !== undefined && existingUserIndex !== -1) {
           // User exists, update the existing user
           const updatedUsers = [...state.userInServices!];
           updatedUsers[existingUserIndex] = { ...updatedUsers[existingUserIndex], ...user };
-          return { users: updatedUsers };
+          return { userInServices: updatedUsers };
         } else {
           // User does not exist, add a new user
           return { userInServices: state.userInServices ? [...state.userInServices, user] : [user] };
@@ -83,6 +85,11 @@ export const useAuthStore = create<AuthStore>()(
         refresh_token: state.refresh_token,
         service_tokens: state.service_tokens,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.setHydrated();
+        }
+      },
     }
   )
 );
