@@ -24,10 +24,10 @@ const getDashboardTokens = () => {
 };
 
 export const dashboardAuthAPI = createAPI(
-  "http://135.181.250.208:8050",
+  "https://api-dashboard-finitx.darkube.app",
   getDashboardTokens,
   updateAuthStore,
-  "http://135.181.250.208:8050/auth/refresh"
+  "https://api-dashboard-finitx.darkube.app/auth/refresh"
 );
 
 // OBWB Service
