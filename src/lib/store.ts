@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { setAuthStoreUpdater } from "./api/base";
 import type { AuthStore, User } from "@/types";
 import { ServiceToken } from "@/types/auth";
 import { ExtendedOpticalDashboardStore, OpticalDashboardData } from "@/types/dashboard";
@@ -120,12 +119,6 @@ export const useOpticalDashboardStore = create<ExtendedOpticalDashboardStore>()(
     // }
   )
 );
-
-
-// ✅ Register store updater separately (after initialization)
-setAuthStoreUpdater((access_token: string, refresh_token: string) => {
-  useAuthStore.getState().updateTokens(access_token, refresh_token);
-});
 
 export const useBranchPerformanceData = () => {
   const { branchPerformance } = useOpticalDashboardStore();

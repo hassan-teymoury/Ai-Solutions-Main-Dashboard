@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { authAPI } from "@/lib/api";
@@ -14,9 +14,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   // Helper: check if user has service access
-  const hasServiceAccess = (serviceName: string) => {
+  const hasServiceAccess = useCallback((serviceName: string) => {
     return userInServices?.some((u) => u.service === serviceName);
-  };
+  }, [userInServices]);
 
   useEffect(() => {
     let ignore = false;
@@ -122,7 +122,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         setAccessDenied(false);
       }
     }
-  }, [pathname, loading, userInServices, hydrated]);
+  }, [pathname, loading, hasServiceAccess, hydrated]);
 
   if (loading || !hydrated) {
     return (

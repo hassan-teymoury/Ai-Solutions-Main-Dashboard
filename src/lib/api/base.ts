@@ -2,17 +2,6 @@ import { createAPI } from "./createAPI";
 
 const AUTH_STORAGE_KEY = "auth-storage";
 
-// Shared token updater
-let updateAuthStore:
-  | ((access_token: string, refresh_token: string) => void)
-  | null = null;
-
-export const setAuthStoreUpdater = (
-  updater: (access_token: string, refresh_token: string) => void
-) => {
-  updateAuthStore = updater;
-};
-
 // Dashboard tokens (main login)
 const getDashboardTokens = () => {
   try {
@@ -25,8 +14,7 @@ const getDashboardTokens = () => {
 
 export const dashboardAuthAPI = createAPI(
   "https://api-dashboard-finitx.darkube.app",
-  getDashboardTokens,
-  updateAuthStore
+  getDashboardTokens
 );
 
 // OBWB Service
@@ -44,6 +32,5 @@ const getObwbTokens = () => {
 
 export const obwbAPI = createAPI(
   "https://obwbapi.finitx.com",
-  getObwbTokens,
-  updateAuthStore
+  getObwbTokens
 );

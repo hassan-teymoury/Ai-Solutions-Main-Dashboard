@@ -1,13 +1,9 @@
 // utils/createAPI.ts
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from "axios";
 
-type TokenUpdater = ((access_token: string, refresh_token: string) => void) | null;
-
 export const createAPI = (
   baseURL: string,
-  getTokens: () => { access_token?: string; refresh_token?: string },
-  updateTokens: TokenUpdater = null,
-  refreshUrl?: string
+  getTokens: () => { access_token?: string; refresh_token?: string }
 ): AxiosInstance => {
   const instance = axios.create({
     baseURL,
