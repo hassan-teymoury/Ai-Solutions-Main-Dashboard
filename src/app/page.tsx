@@ -10,7 +10,7 @@ import { SignupForm } from "@/components/auth/signup-form";
 
 export default function HomePage() {
   const [isLogin, setIsLogin] = useState(true);
-  const { isLoading, user } = useAuthStore();
+  const { isLoading, user, access_token } = useAuthStore();
   const { theme } = useThemeStore();
   const router = useRouter();
 
@@ -30,7 +30,8 @@ export default function HomePage() {
   }, [theme]);
 
   useEffect(() => {
-    if (!isLoading && user) {
+    debugger
+    if (!isLoading && user && access_token) {
       router.push("/dashboard");
     }
   }, [isLoading, router, user]);
@@ -48,7 +49,7 @@ export default function HomePage() {
     );
   }
 
-  if (user) {
+  if (user && access_token) {
     return null;
   }
 

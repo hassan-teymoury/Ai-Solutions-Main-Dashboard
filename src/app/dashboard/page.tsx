@@ -15,19 +15,19 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const handleConnectEmail = () => {
-    router.push("/dashboard/connect-email");
+    router.push("/dashboard/Obwb/connect-email");
   };
 
   const handleViewEmails = () => {
-    router.push("/dashboard/emails");
+    router.push("/dashboard/Obwb/emails");
   };
 
   const handleAIDigest = () => {
-    router.push("/dashboard/ai-digest");
+    router.push("/dashboard/Obwb/ai-digest");
   };
 
   const handleFollowUps = () => {
-    router.push("/dashboard/follow-ups");
+    router.push("/dashboard/Obwb/follow-ups");
   };
 
   return (
