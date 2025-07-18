@@ -26,8 +26,7 @@ const getDashboardTokens = () => {
 export const dashboardAuthAPI = createAPI(
   "https://api-dashboard-finitx.darkube.app",
   getDashboardTokens,
-  updateAuthStore,
-  "https://api-dashboard-finitx.darkube.app/auth/refresh"
+  updateAuthStore
 );
 
 // OBWB Service

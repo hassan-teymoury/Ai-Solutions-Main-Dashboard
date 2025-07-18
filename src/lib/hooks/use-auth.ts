@@ -29,10 +29,14 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: async (credentials: LoginRequest) => {
+      console.log("Attempting login...");
       const response = await authAPI.login(credentials);
+      console.log("Login successful:", response);
       return response;
     },
     onSuccess: (data) => {
+      console.log("Setting user data in store...");
+      
       // Update store with user data
       setUser({...data.user, service: 'dashboard'});
       setAccessToken(data.access_token);
@@ -42,6 +46,8 @@ export function useLogin() {
       // Invalidate and refetch user-related queries
       queryClient.invalidateQueries({ queryKey: ["user"] });
       queryClient.invalidateQueries({ queryKey: ["profile"] });
+      
+      console.log("User data set successfully");
     },
     onError: (error) => {
       console.error("Login error:", error);
