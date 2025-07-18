@@ -32,6 +32,7 @@ export default function HomePage() {
   useEffect(() => {
     // Only redirect if store is hydrated and we have valid auth data
     if (hydrated && !isLoading && user && access_token) {
+      console.log("User authenticated, redirecting to dashboard");
       router.push("/dashboard");
     }
   }, [hydrated, isLoading, user, access_token, router]);
@@ -52,7 +53,16 @@ export default function HomePage() {
 
   // Don't render anything if user is authenticated (will redirect)
   if (user && access_token) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-secondary via-background to-secondary/50 dark:from-background dark:via-background dark:to-muted">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan border-t-transparent mx-auto"></div>
+          <p className="mt-4 text-muted-foreground font-medium">
+            Redirecting to dashboard...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

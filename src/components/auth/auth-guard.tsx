@@ -1,17 +1,17 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { authAPI } from "@/lib/api";
-import { RefreshCw } from "lucide-react";
 import { obwbAuthAPI } from "@/lib/api/obwb/auth";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { setUsers, setUser, userInServices, hydrated, access_token } = useAuthStore();
+  const { setUsers, setUser, userInServices, hydrated, access_token, user } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+  const validationRef = useRef(false);
 
   // Helper: check if user has service access
   const hasServiceAccess = useCallback((serviceName: string) => {
@@ -27,6 +27,22 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         if (!hydrated) {
           return;
         }
+
+        // Prevent multiple validations
+        if (validationRef.current) {
+          return;
+        }
+
+        // If we already have a user and token, skip validation
+        if (user && access_token) {
+          console.log("User already authenticated, skipping validation");
+          if (!ignore) {
+            setLoading(false);
+          }
+          return;
+        }
+
+        validationRef.current = true;
 
         // Check if we have a token in store first
         if (!access_token) {
@@ -109,7 +125,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return () => {
       ignore = true;
     };
-  }, [router, setUsers, setUser, hydrated, access_token]);
+  }, [hydrated, access_token, user, router]);
 
   // After loading, check service access based on pathname
   useEffect(() => {
@@ -128,7 +144,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-4" />
+          <div className="animate-spin rounded-full h-8 w-8 border-4 border-cyan border-t-transparent mx-auto mb-4"></div>
           <p className="mt-2 text-muted-foreground">Loading...</p>
         </div>
       </div>
