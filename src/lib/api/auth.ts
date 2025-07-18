@@ -86,13 +86,9 @@ export const authAPI = {
           Authorization: `Bearer ${access_token}`,
         },
       });
-      const user_id = JSON.parse(localStorage.getItem("auth-storage")!).state
-        .user.id;
+
       return {
         ...response.data,
-        // microsoft_user_id: connectionStatus.connected
-        //   ? response.data.microsoft_user_id
-        //   : null,
       };
     } catch (error) {
       throw error;

@@ -34,7 +34,10 @@ export const dashboardAuthAPI = createAPI(
 const getObwbTokens = () => {
   const auth = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || "{}");
   const token = auth?.state?.service_tokens?.find(
-    (t: any) => t.service?.name === "obwb"
+    (t: unknown) => {
+      const token = t as { service?: { name?: string }; token?: string };
+      return token.service?.name === "obwb"
+    }
   )?.token;
 
   return { access_token: token };

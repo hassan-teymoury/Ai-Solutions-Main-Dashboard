@@ -229,7 +229,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
                               <AlertTriangle className="mr-2 h-5 w-5 text-red-500" />
                             </TooltipTrigger>
                             <TooltipContent>
-                              <p>You don't have access to this service</p>
+                              <p>You do not have access to this service</p>
                             </TooltipContent>
                           </Tooltip>
                         )}
@@ -280,7 +280,7 @@ export function Sidebar({ onMobileClose }: SidebarProps) {
                                     <AlertTriangle className="ml-auto h-4 w-4 text-red-500" />
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>You don't have access to this service</p>
+                                    <p>You do not have access to this service</p>
                                   </TooltipContent>
                                 </Tooltip>
                               )}

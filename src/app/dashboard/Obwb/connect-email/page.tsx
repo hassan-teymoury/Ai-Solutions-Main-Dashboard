@@ -67,7 +67,7 @@ export default function ConnectEmailPage() {
       setError("");
       await emailAPI.disconnectEmail(user?.microsoft_user_id as string);
       toast.success("Email disconnected successfully");
-      setMicrosoftUserId(null);
+      setMicrosoftUserId('');
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to disconnect email"
