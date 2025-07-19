@@ -13,7 +13,7 @@ import { useAuthStore } from "@/lib/store";
 export const emailAPI = {
   getAuthUrl: async (): Promise<AuthUrlResponse> => {
     try {
-      const response = await dashboardAuthAPI.get<AuthUrlResponse>("/auth/microsoft/url");
+      const response = await dashboardAuthAPI.get<AuthUrlResponse>("/emails/auth-url");
       return response.data;
     } catch (error) {
       throw error;
