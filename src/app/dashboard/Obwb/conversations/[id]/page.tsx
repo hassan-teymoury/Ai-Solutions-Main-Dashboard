@@ -182,7 +182,7 @@ export default function ConversationDetailPage() {
                 Connect your email account to view conversation details.
               </p>
               <a
-                href="/dashboard/connect-email"
+                href="/dashboard/Obwb/connect-email"
                 className="inline-flex items-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
               >
                 Connect Email Account

@@ -14,7 +14,7 @@ export function ConversationNoAccount() {
           Please connect your email account to view your conversations.
         </p>
         <Button asChild>
-          <Link href="/dashboard/connect-email">Connect Email</Link>
+          <Link href="/dashboard/Obwb/connect-email">Connect Email</Link>
         </Button>
       </div>
     </div>
