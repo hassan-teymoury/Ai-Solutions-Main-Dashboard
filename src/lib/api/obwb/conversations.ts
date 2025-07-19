@@ -1,5 +1,5 @@
 import axios from "axios";
-import { obwbAPI as api } from "../base";
+import { dashboardAuthAPI as api } from "../base";
 import type {
   ConversationResponse,
   ConversationFilters,
@@ -55,23 +55,19 @@ export const conversationsAPI = {
     }
   },
 
-  getConversationEmails: async (
+  getRelatedEmails: async (
     microsoft_user_id: string,
-    conversation_id: string,
-    filters: ConversationDetailFilters = {}
+    conversation_id: string
   ): Promise<EmailResponse> => {
     try {
       const response = await api.get<EmailResponse>(
-        `/conversations/${microsoft_user_id}/${conversation_id}/emails`,
-        {
-          params: filters,
-        }
+        `/conversations/${microsoft_user_id}/${conversation_id}/related-emails`
       );
       return response.data;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         throw new Error(
-          error.response?.data?.detail || "Failed to get conversation emails"
+          error.response?.data?.detail || "Failed to get related emails"
         );
       }
       throw error;

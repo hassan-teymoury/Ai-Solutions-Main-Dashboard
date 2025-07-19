@@ -3,10 +3,9 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { authAPI } from "@/lib/api";
-import { obwbAuthAPI } from "@/lib/api/obwb/auth";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { setUsers, setUser, userInServices, hydrated, access_token, user } = useAuthStore();
+  const { setUser, userInServices, hydrated, access_token, user } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [accessDenied, setAccessDenied] = useState(false);
   const router = useRouter();
@@ -77,7 +76,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
         console.log("Validating token...");
 
-        // Validate main dashboard token first
+        // Validate main dashboard token
         try {
           const userData = await authAPI.me(tokenToUse);
           if (!ignore) {
@@ -93,18 +92,6 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
             router.replace("/");
           }
           return;
-        }
-
-        // Try to validate OBWB token (optional - don't fail if this fails)
-        try {
-          const obwbUserData = await obwbAuthAPI.me(tokenToUse);
-          if (!ignore) {
-            setUsers({ ...obwbUserData, service: "obwb" });
-            console.log("OBWB validation successful");
-          }
-        } catch (error) {
-          console.warn("OBWB auth validation failed (optional):", error);
-          // Don't fail the entire validation for OBWB
         }
 
         if (!ignore) {

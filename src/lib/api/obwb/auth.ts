@@ -1,10 +1,8 @@
-import { obwbAPI as api } from "../base";
+import { dashboardAuthAPI as api } from "../base";
 import type { User } from "@/types";
-import { emailAPI } from "./email";
 
 // Auth API methods
 export const obwbAuthAPI = {
-
   me: async (access_token: string): Promise<User> => {
     try {
       const response = await api.get<User>("/auth/me", {
@@ -12,14 +10,11 @@ export const obwbAuthAPI = {
           Authorization: `Bearer ${access_token}`,
         },
       });
-      const connectionStatus = await emailAPI.connectionStatus(
-        response.data.id.toString()
-      );
+      
+      // Just return the user data without connection status check
       return {
         ...response.data,
-        microsoft_user_id: connectionStatus.connected
-          ? response.data.microsoft_user_id
-          : null,
+        service: "obwb"
       };
     } catch (error) {
       throw error;

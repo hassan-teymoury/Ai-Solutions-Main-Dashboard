@@ -11,7 +11,7 @@ import {
   RelatedEmailsResponse,
   ResponsesResponse,
 } from "@/types/AIServices";
-import { obwbAPI as api } from "../base";
+import { dashboardAuthAPI as api } from "../base";
 
 export const AIServices = {
   generateResponse: async (
@@ -70,6 +70,18 @@ export const AIServices = {
     await api.post(`/ai/${user_id}/clear-cache/${conversation_id}`);
   },
 
+  generateDigest: async (
+    user_id: string,
+    digest_type: DigestType,
+    date_range?: string
+  ): Promise<GenerateDigestResponse> => {
+    const response = await api.post(`/ai/${user_id}/generate-digest`, {
+      digest_type,
+      date_range,
+    });
+    return response.data;
+  },
+
   analyzeConversation: async (
     user_id: string,
     conversation_id: string
@@ -80,43 +92,30 @@ export const AIServices = {
     return response.data;
   },
 
-  generateDigest: async (
+  getFollowUpRequiredEmails: async (
     user_id: string,
-    digest_type: DigestType,
-    date_range: string
-  ): Promise<GenerateDigestResponse> => {
-    const response = await api.post(`/ai/${user_id}/generate-digest`, {
-      params: {
-        digest_type,
-        date_range,
-      },
+    filters: FollowUpRequiredEmailsFilters = {}
+  ): Promise<FollowUpRequiredEmailsResponse> => {
+    const params: Record<string, string | number> = {
+      page_num: filters.page_num || 1,
+      page_size: Math.min(filters.page_size || 20, 100), // Ensure max 100
+    };
+
+    if (filters.priority) {
+      params.priority = filters.priority;
+    }
+
+    const response = await api.get(`/ai/${user_id}/follow-up-required`, {
+      params,
     });
     return response.data;
   },
 
   getRelatedEmails: async (
     user_id: string,
-    conversation_id: string,
-    limit: number
+    email_id: string
   ): Promise<RelatedEmailsResponse> => {
-    const response = await api.get(
-      `/ai/${user_id}/related-emails/${conversation_id}`,
-      {
-        params: {
-          limit,
-        },
-      }
-    );
-    return response.data;
-  },
-
-  getFollowUpRequiredEmails: async (
-    user_id: string,
-    filters: FollowUpRequiredEmailsFilters
-  ): Promise<FollowUpRequiredEmailsResponse> => {
-    const response = await api.get(`/ai/${user_id}/follow-up-emails/`, {
-      params: filters,
-    });
+    const response = await api.get(`/ai/${user_id}/related-emails/${email_id}`);
     return response.data;
   },
 };

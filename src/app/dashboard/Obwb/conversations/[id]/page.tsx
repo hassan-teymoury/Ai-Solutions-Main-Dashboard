@@ -96,7 +96,7 @@ export default function ConversationDetailPage() {
   const { data: relatedEmails, isLoading: relatedEmailsLoading, refetch: refetchRelatedEmails } = useQuery({
     queryKey: ["related-emails", microsoftUserId, conversationId],
     queryFn: () =>
-      AIServices.getRelatedEmails(microsoftUserId!, conversationId, 5),
+      AIServices.getRelatedEmails(microsoftUserId!, conversationId),
     enabled: !!microsoftUserId && !!conversationId && showAI,
     staleTime: 10 * 60 * 1000, // 10 minutes
   });

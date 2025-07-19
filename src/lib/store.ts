@@ -30,6 +30,21 @@ export const useAuthStore = create<AuthStore>()(
 
       setUser: (user) => {
         set({ user });
+        
+        // Also add to userInServices for compatibility
+        set((state) => {
+          const existingUserIndex = state.userInServices?.findIndex(u => u.service === user.service);
+          
+          if (existingUserIndex !== undefined && existingUserIndex !== -1) {
+            // User exists, update the existing user
+            const updatedUsers = [...state.userInServices!];
+            updatedUsers[existingUserIndex] = { ...updatedUsers[existingUserIndex], ...user };
+            return { userInServices: updatedUsers };
+          } else {
+            // User does not exist, add a new user
+            return { userInServices: state.userInServices ? [...state.userInServices, user] : [user] };
+          }
+        });
       },
 
       setUsers: (user: User) => set((state) => {
@@ -45,10 +60,19 @@ export const useAuthStore = create<AuthStore>()(
           return { userInServices: state.userInServices ? [...state.userInServices, user] : [user] };
         }
       }),
+      
       getUserByService: (serviceName: string) => {
-        const { userInServices } = get();
+        const { userInServices, user } = get();
+        
+        // Check main user first
+        if (user && user.service === serviceName) {
+          return user;
+        }
+        
+        // Then check userInServices
         return userInServices?.find((user) => user.service === serviceName) || null;
       },
+      
       setAccessToken: (access_token: string) => set({ access_token }),
       setRefreshToken: (refresh_token: string) => set({ refresh_token }),
       updateTokens: (access_token: string, refresh_token: string) =>
@@ -64,6 +88,13 @@ export const useAuthStore = create<AuthStore>()(
 
       setHydrated: () => set({ hydrated: true, isLoading: false }),
       setMicrosoftUserId: (microsoft_user_id: string) => {
+        const { user } = get();
+        if (user) {
+          set({ 
+            user: { ...user, microsoft_user_id }
+          });
+        }
+        
         const { userInServices } = get();
         if (userInServices) {
           const updatedUsers = userInServices.map((user) =>

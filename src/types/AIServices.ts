@@ -108,7 +108,7 @@ export interface RelatedEmailsResponse {
 }
 
 export interface FollowUpRequiredEmailsFilters {
-  priority: "low" | "medium" | "high";
+  priority?: "low" | "medium" | "high";
   page_num?: number;
   page_size?: number;
 }

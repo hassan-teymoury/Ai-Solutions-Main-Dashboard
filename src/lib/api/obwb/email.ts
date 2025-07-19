@@ -1,5 +1,5 @@
 import axios from "axios";
-import { obwbAPI as api } from "../base";
+import { dashboardAuthAPI as api } from "../base";
 import type {
   EmailResponse,
   EmailFilters,
