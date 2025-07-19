@@ -104,9 +104,9 @@ export default function EmailsPage() {
   } = useQuery({
     queryKey: ["emails", microsoftUserId, currentPage, pageSize, filters],
     queryFn: () =>
-      emailAPI.getEmails(microsoftUserId!, {
-        page_num: currentPage,
-        page_size: pageSize,
+      emailAPI.getEmails(user?.id?.toString() || "", {
+        page: currentPage,
+        limit: pageSize,
         ...filters,
       }),
     enabled: !!microsoftUserId,

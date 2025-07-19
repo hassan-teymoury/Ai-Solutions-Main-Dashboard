@@ -74,4 +74,58 @@ export interface EmailConnectionResponse {
   updated_at: string;
 }
 
+export interface EmailDisconnectResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface AuthUrlResponse {
+  auth_url: string;
+  state: string;
+}
+
+export interface EmailsResponse {
+  emails: any[];
+  total: number;
+  page: number;
+  limit: number;
+  pagination: {
+    page_num: number;
+    page_size: number;
+    total_items: number;
+    total_pages: number;
+    has_next: boolean;
+    has_prev: boolean;
+  };
+}
+
+export interface EmailDetailResponse {
+  id: string;
+  subject: string;
+  sender: string;
+  sender_name: string;
+  sender_email: string;
+  body: string;
+  body_preview?: string;
+  received_at: string;
+  is_read: boolean;
+  importance: "high" | "normal" | "low";
+  has_attachments: boolean;
+  thread_id?: string;
+}
+
+export interface ConversationsResponse {
+  conversations: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export interface FollowUpEmailsResponse {
+  emails: any[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 

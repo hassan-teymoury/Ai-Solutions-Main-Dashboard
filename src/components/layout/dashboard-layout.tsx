@@ -5,6 +5,7 @@ import { Sidebar } from './sidebar'
 import { Button } from '@/components/ui/button'
 import { Menu } from 'lucide-react'
 import { DataProvider } from '../providers/data-provider'
+import { ServiceAccessWarning } from '@/components/ui/service-access-warning'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -51,6 +52,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         <div className="p-4 lg:p-6">
+          {/* Service Access Warning - only shows if user doesn't have access */}
+          <ServiceAccessWarning />
+          
           <DataProvider>
             {children}
           </DataProvider>

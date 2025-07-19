@@ -1,104 +1,67 @@
-import axios from "axios";
-import { dashboardAuthAPI as api } from "../base";
-import type {
-  EmailResponse,
-  EmailFilters,
-  Email,
-  SyncEmailsResponse,
-} from "@/types";
-import { ConnectionStatusResponse, EmailConnectionResponse } from "@/types/api";
+import { dashboardAuthAPI } from "../base";
+import {
+  EmailConnectionResponse,
+  EmailDisconnectResponse,
+  AuthUrlResponse,
+  EmailsResponse,
+  EmailDetailResponse,
+  ConversationsResponse,
+  FollowUpEmailsResponse,
+} from "@/types/api";
+import { useAuthStore } from "@/lib/store";
 
-// Email API methods
 export const emailAPI = {
-  // Get email authentication URL
-  getAuthUrl: async (): Promise<{ auth_url: string; state: string }> => {
+  getAuthUrl: async (): Promise<AuthUrlResponse> => {
     try {
-      const response = await api.get<{ auth_url: string; state: string }>(
-        "/emails/auth-url"
+      const response = await dashboardAuthAPI.get<AuthUrlResponse>("/auth/microsoft/url");
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  connectEmail: async (user_id: string): Promise<EmailConnectionResponse> => {
+    try {
+      const response = await dashboardAuthAPI.post<EmailConnectionResponse>(
+        `/users/${user_id}/connect-email`
       );
       return response.data;
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(
-          error.response?.data?.detail?.[0]?.msg || "Failed to get auth URL"
-        );
-      }
+      throw error;
+    }
+  },
+
+  disconnectEmail: async (microsoft_user_id: string): Promise<EmailDisconnectResponse> => {
+    try {
+      const response = await dashboardAuthAPI.delete<EmailDisconnectResponse>(
+        `/users/microsoft/${microsoft_user_id}/disconnect-email`
+      );
+      return response.data;
+    } catch (error) {
       throw error;
     }
   },
 
   getEmails: async (
-    microsoft_user_id: string,
-    filters: EmailFilters = {}
-  ): Promise<EmailResponse> => {
+    user_id: string,
+    options: {
+      page?: number;
+      limit?: number;
+      [key: string]: any;
+    } = {}
+  ): Promise<EmailsResponse> => {
     try {
-      const response = await api.get<EmailResponse>(
-        `/emails/${microsoft_user_id}`,
-        {
-          params: filters,
-        }
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  getEmailById: async (
-    microsoft_user_id: string,
-    id: string
-  ): Promise<Email> => {
-    try {
-      const response = await api.get<Email>(
-        `/emails/${microsoft_user_id}/${id}`
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  markEmailAsRead: async (
-    microsoft_user_id: string,
-    id: string
-  ): Promise<void> => {
-    try {
-      await api.patch(`/emails/${microsoft_user_id}/${id}/read`, "true");
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  syncEmails: async (
-    microsoft_user_id: string
-  ): Promise<SyncEmailsResponse> => {
-    try {
-      const response = await api.post<SyncEmailsResponse>(
-        `/emails/sync/${microsoft_user_id}`,
-        {
-          max_emails: 100,
-        }
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  disconnectEmail: async (microsoft_user_id: string): Promise<void> => {
-    try {
-      await api.post(`/users/${microsoft_user_id}/disconnect`, {
-        user_id: microsoft_user_id,
+      const { page = 1, limit = 10, ...filters } = options;
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...Object.fromEntries(
+          Object.entries(filters).map(([key, value]) => [key, String(value)])
+        ),
       });
-    } catch (error) {
-      throw error;
-    }
-  },
 
-  connectEmail: async (user_id: string): Promise<ConnectionStatusResponse> => {
-    try {
-      const response = await api.post<ConnectionStatusResponse>(
-        `/users/${user_id}/connect`
+      const response = await dashboardAuthAPI.get<EmailsResponse>(
+        `/users/${user_id}/emails?${params}`
       );
       return response.data;
     } catch (error) {
@@ -106,14 +69,82 @@ export const emailAPI = {
     }
   },
 
-  connectionStatus: async (
-    user_id: string
-  ): Promise<EmailConnectionResponse> => {
+  getEmailDetail: async (
+    user_id: string,
+    email_id: string
+  ): Promise<EmailDetailResponse> => {
     try {
-      const response = await api.get<EmailConnectionResponse>(
-        `/users/${user_id}/connection-status`
+      const response = await dashboardAuthAPI.get<EmailDetailResponse>(
+        `/users/${user_id}/emails/${email_id}`
       );
       return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getConversations: async (
+    user_id: string,
+    page: number = 1,
+    limit: number = 10
+  ): Promise<ConversationsResponse> => {
+    try {
+      const response = await dashboardAuthAPI.get<ConversationsResponse>(
+        `/users/${user_id}/conversations?page=${page}&limit=${limit}`
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getFollowUpEmails: async (
+    user_id: string,
+    page: number = 1,
+    limit: number = 10,
+    filters?: Record<string, any>
+  ): Promise<FollowUpEmailsResponse> => {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...filters,
+      });
+
+      const response = await dashboardAuthAPI.get<FollowUpEmailsResponse>(
+        `/users/${user_id}/follow-up-emails?${params}`
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Instead of connectionStatus, check user's microsoft_user_id from auth store
+  checkEmailConnection: (): { connected: boolean; email?: string; user_id?: string } => {
+    const { user } = useAuthStore.getState();
+    
+    return {
+      connected: !!user?.microsoft_user_id,
+      email: user?.email || undefined,
+      user_id: user?.microsoft_user_id || undefined,
+    };
+  },
+
+  syncEmails: async (microsoft_user_id: string): Promise<{ emails_fetched: number; emails_saved: number }> => {
+    try {
+      const response = await dashboardAuthAPI.post<{ emails_fetched: number; emails_saved: number }>(
+        `/users/microsoft/${microsoft_user_id}/sync-emails`
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  markEmailAsRead: async (user_id: string, email_id: string): Promise<void> => {
+    try {
+      await dashboardAuthAPI.patch(`/users/${user_id}/emails/${email_id}/read`);
     } catch (error) {
       throw error;
     }

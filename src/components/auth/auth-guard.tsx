@@ -1,21 +1,14 @@
 "use client";
-import { useEffect, useState, useCallback, useRef } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store";
 import { authAPI } from "@/lib/api";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { setUser, userInServices, hydrated, access_token, user } = useAuthStore();
+  const { setUser, hydrated, access_token, user } = useAuthStore();
   const [loading, setLoading] = useState(true);
-  const [accessDenied, setAccessDenied] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
   const validationRef = useRef(false);
-
-  // Helper: check if user has service access
-  const hasServiceAccess = useCallback((serviceName: string) => {
-    return userInServices?.some((u) => u.service === serviceName);
-  }, [userInServices]);
 
   useEffect(() => {
     let ignore = false;
@@ -114,19 +107,6 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     };
   }, [hydrated, access_token, user, router]);
 
-  // After loading, check service access based on pathname
-  useEffect(() => {
-    if (!loading && hydrated) {
-      if (pathname.includes("Obwb") && !hasServiceAccess("obwb")) {
-        setAccessDenied(true);
-      } else if (pathname.includes("Optical") && !hasServiceAccess("optical")) {
-        setAccessDenied(true);
-      } else {
-        setAccessDenied(false);
-      }
-    }
-  }, [pathname, loading, hasServiceAccess, hydrated]);
-
   if (loading || !hydrated) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -134,16 +114,6 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           <div className="animate-spin rounded-full h-8 w-8 border-4 border-cyan border-t-transparent mx-auto mb-4"></div>
           <p className="mt-2 text-muted-foreground">Loading...</p>
         </div>
-      </div>
-    );
-  }
-
-  if (accessDenied) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background px-4">
-        <p className="text-center text-lg font-semibold text-destructive">
-          This service is not active for you.
-        </p>
       </div>
     );
   }

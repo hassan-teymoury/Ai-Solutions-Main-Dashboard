@@ -19,11 +19,10 @@ export default function ConnectEmailPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState("");
-  const { getUserByService, setMicrosoftUserId } = useAuthStore();
-  const user = getUserByService('obwb');
+  const { user, setMicrosoftUserId } = useAuthStore();
 
   const [connectionStatus, setConnectionStatus] =
-    useState<EmailConnectionResponse | null>(null);
+    useState<{ connected: boolean; email?: string; user_id?: string } | null>(null);
   const handleConnectEmail = async () => {
     setIsLoading(true);
     setError("");
@@ -45,12 +44,23 @@ export default function ConnectEmailPage() {
 
   const handleReconnect = async () => {
     try {
-      const connectionStatus = await emailAPI.connectEmail(
-        user?.id.toString() as string
+      if (!user?.id) {
+        toast.error("User ID not available");
+        return;
+      }
+      
+      const connectionStatus: EmailConnectionResponse = await emailAPI.connectEmail(
+        user.id.toString()
       );
       if (connectionStatus.connected) {
-        setMicrosoftUserId(connectionStatus.user_id);
+        setMicrosoftUserId(connectionStatus.microsoft_user_id);
         toast.success("Email connected successfully");
+        // Update local state with new connection status
+        setConnectionStatus({
+          connected: true,
+          email: connectionStatus.email,
+          user_id: connectionStatus.microsoft_user_id,
+        });
       } else {
         toast.error("Failed to connect email");
       }
@@ -65,7 +75,13 @@ export default function ConnectEmailPage() {
     try {
       setIsLoading(true);
       setError("");
-      await emailAPI.disconnectEmail(user?.microsoft_user_id as string);
+      
+      if (!user?.microsoft_user_id) {
+        toast.error("Microsoft user ID not available");
+        return;
+      }
+      
+      await emailAPI.disconnectEmail(user.microsoft_user_id);
       toast.success("Email disconnected successfully");
       setMicrosoftUserId('');
     } catch (error) {
@@ -79,9 +95,14 @@ export default function ConnectEmailPage() {
 
   const getConnectionStatus = async () => {
     try {
-      const connectionStatus = await emailAPI.connectionStatus(
-        user?.id.toString() as string
-      );
+      if (!user?.id) {
+        console.log("No user ID available, skipping connection status check");
+        setIsInitialLoading(false);
+        return;
+      }
+      
+      // Use local check instead of API call
+      const connectionStatus = emailAPI.checkEmailConnection();
       setConnectionStatus(connectionStatus);
     } catch (error) {
       console.error("Failed to get connection status:", error);
@@ -91,9 +112,11 @@ export default function ConnectEmailPage() {
   };
 
   useEffect(() => {
-    getConnectionStatus();
+    if (user?.id) {
+      getConnectionStatus();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.microsoft_user_id]);
+  }, [user?.id, user?.microsoft_user_id]);
 
   return (
     <div className="space-y-6">

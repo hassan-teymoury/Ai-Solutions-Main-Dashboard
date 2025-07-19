@@ -34,13 +34,13 @@ export default function EmailDetailPage() {
   } = useQuery({
     queryKey: ["email", emailId],
     queryFn: () =>
-      emailAPI.getEmailById(user?.microsoft_user_id || "", emailId),
+      emailAPI.getEmailDetail(user?.id?.toString() || "", emailId),
     enabled: !!emailId,
   });
 
   useEffect(() => {
     if (email && !email.is_read && user?.microsoft_user_id && emailId) {
-      emailAPI.markEmailAsRead(user.microsoft_user_id, emailId)
+      emailAPI.markEmailAsRead(user.id.toString(), emailId)
         .then(() => {
           queryClient.invalidateQueries({ queryKey: ["emails", user.microsoft_user_id], exact: false });
         })
@@ -96,7 +96,7 @@ export default function EmailDetailPage() {
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Clock className="h-4 w-4" />
                 {format(
-                  new Date(email.received_date),
+                  new Date(email.received_at),
                   "MMM dd, yyyy 'at' HH:mm"
                 )}
               </div>
