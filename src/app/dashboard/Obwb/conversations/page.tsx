@@ -11,7 +11,7 @@ import {
 } from "@/components/obwb/conversations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { conversationsAPI, emailAPI } from "@/lib/api";
-import { useAuthStore } from "@/lib/store";
+import { useObwbUser } from "@/lib/hooks/use-auth";
 import { cn } from "@/lib/utils";
 import { ConversationFilters } from "@/types/emails";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,8 +22,10 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function ConversationsPage() {
-  const { getUserByService } = useAuthStore();
-  const user = getUserByService('obwb')
+  // Get OBWB user data from API
+  const { data: obwbUser } = useObwbUser();
+  const microsoftUserId = obwbUser?.microsoft_user_id;
+  
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -90,8 +92,6 @@ export default function ConversationsPage() {
     router.replace(`?${params.toString()}`, { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, filters]);
-
-  const microsoftUserId = user?.microsoft_user_id;
 
   const {
     data: conversationsData,
@@ -276,7 +276,7 @@ export default function ConversationsPage() {
                     className="p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
                     onClick={() =>
                       router.push(
-                        `/dashboard/conversations/${conversation.conversation_id}`
+                        `/dashboard/Obwb/conversations/${conversation.conversation_id}`
                       )
                     }
                   >

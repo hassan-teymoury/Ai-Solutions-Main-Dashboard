@@ -52,16 +52,22 @@ export const emailAPI = {
   ): Promise<EmailsResponse> => {
     try {
       const { page = 1, limit = 10, ...filters } = options;
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...Object.fromEntries(
-          Object.entries(filters).map(([key, value]) => [key, String(value)])
-        ),
+      
+      // Create params object, filtering out undefined values
+      const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', limit.toString());
+      
+      // Add filters only if they have actual values (not undefined, null, or empty string)
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          params.append(key, String(value));
+        }
       });
 
+      const queryString = params.toString();
       const response = await obwbAPI.get<EmailsResponse>(
-        `/emails/${microsoft_user_id}?${params}`
+        `/emails/${microsoft_user_id}?${queryString}`
       );
       return response.data;
     } catch (error) {

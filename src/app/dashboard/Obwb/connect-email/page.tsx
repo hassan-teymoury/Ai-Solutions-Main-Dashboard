@@ -105,7 +105,15 @@ export default function ConnectEmailPage() {
       
       await emailAPI.disconnectEmail(microsoftUserId);
       toast.success("Email disconnected successfully");
-      setMicrosoftUserId('');
+      
+      // Update connection status to disconnected
+      setConnectionStatus({
+        connected: false,
+        email: obwbUser?.email,
+        user_id: microsoftUserId,
+      });
+      
+      // Don't clear microsoft_user_id as user still exists, just disconnected
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to disconnect email"
@@ -117,15 +125,19 @@ export default function ConnectEmailPage() {
 
   const getConnectionStatus = async () => {
     try {
-      if (!user?.id) {
-        console.log("No user ID available, skipping connection status check");
+      if (!obwbUser?.microsoft_user_id) {
+        console.log("No microsoft user ID available, skipping connection status check");
         setIsInitialLoading(false);
         return;
       }
       
-      // Use local check instead of API call
-      const connectionStatus = emailAPI.checkEmailConnection();
-      setConnectionStatus(connectionStatus);
+      // For now, assume connected if we have microsoft_user_id
+      // In the future, you might want to call an API to check actual connection status
+      setConnectionStatus({
+        connected: !!obwbUser.microsoft_user_id,
+        email: obwbUser.email,
+        user_id: obwbUser.microsoft_user_id,
+      });
     } catch (error) {
       console.error("Failed to get connection status:", error);
     } finally {
@@ -239,7 +251,7 @@ export default function ConnectEmailPage() {
                 )}
               </Button>
 
-              {!connectionStatus?.connected && connectionStatus?.email && (
+              {connectionStatus?.email && (
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                     <Mail className="h-4 w-4 text-amber-600 dark:text-amber-400" />

@@ -13,7 +13,7 @@ import {
 } from "@/components/obwb/conversations";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { conversationsAPI, AIServices } from "@/lib/api";
-import { useAuthStore } from "@/lib/store";
+import { useObwbUser } from "@/lib/hooks/use-auth";
 import { ConversationDetailFilters } from "@/types/emails";
 import { GenerateResponseRequest } from "@/types/AIServices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,8 +23,10 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export default function ConversationDetailPage() {
-    const { getUserByService } = useAuthStore();
-  const user = getUserByService('obwb')
+  // Get OBWB user data from API
+  const { data: obwbUser } = useObwbUser();
+  const microsoftUserId = obwbUser?.microsoft_user_id;
+  
   const params = useParams();
   const conversationId = params.id as string;
 
@@ -38,8 +40,6 @@ export default function ConversationDetailPage() {
   const [aiResponsesPageSize, setAiResponsesPageSize] = useState(10);
   
   const queryClient = useQueryClient();
-
-  const microsoftUserId = user?.microsoft_user_id;
 
   const {
     data: conversationDetail,
