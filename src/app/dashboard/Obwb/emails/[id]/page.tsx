@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { emailAPI } from "@/lib/api";
-import { useAuthStore } from "@/lib/store";
+import { useObwbUser } from "@/lib/hooks/use-auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
@@ -21,9 +21,10 @@ import { useEffect } from "react";
 export default function EmailDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { getUserByService } = useAuthStore();
-  const user = getUserByService('obwb');
-  const microsoftUserId = user?.microsoft_user_id;
+  
+  // Get OBWB user data from API
+  const { data: obwbUser } = useObwbUser();
+  const microsoftUserId = obwbUser?.microsoft_user_id;
   const emailId = params?.id as string;
   const queryClient = useQueryClient();
 

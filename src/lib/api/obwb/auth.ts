@@ -1,19 +1,29 @@
-import { dashboardAuthAPI as api } from "../base";
+import { obwbAPI } from "../base";
 import type { User } from "@/types";
 
-// Auth API methods
+// Auth API methods for OBWB service
 export const obwbAuthAPI = {
-  me: async (access_token: string): Promise<User> => {
+  me: async (): Promise<User> => {
     try {
-      const response = await api.get<User>("/auth/me", {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-        },
-      });
+      const response = await obwbAPI.get<{
+        id: number;
+        email: string;
+        first_name: string;
+        last_name: string;
+        created_at: string;
+        updated_at: string;
+        microsoft_user_id: string;
+      }>("/auth/me");
       
-      // Just return the user data without connection status check
+      // Transform OBWB response to our User type
       return {
-        ...response.data,
+        id: response.data.id,
+        email: response.data.email,
+        first_name: response.data.first_name,
+        last_name: response.data.last_name,
+        created_at: response.data.created_at,
+        updated_at: response.data.updated_at,
+        microsoft_user_id: response.data.microsoft_user_id,
         service: "obwb"
       };
     } catch (error) {

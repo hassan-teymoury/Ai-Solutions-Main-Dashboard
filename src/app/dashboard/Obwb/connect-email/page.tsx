@@ -12,6 +12,7 @@ import {
 import { Mail, ExternalLink, Loader2, CheckCircle } from "lucide-react";
 import { emailAPI } from "@/lib/api";
 import { useAuthStore } from "@/lib/store";
+import { useObwbUser } from "@/lib/hooks/use-auth";
 import { toast } from "sonner";
 import { EmailConnectionResponse } from "@/types/api";
 
@@ -19,11 +20,13 @@ export default function ConnectEmailPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState("");
-  const { user, setMicrosoftUserId, setObwbUser, getServiceToken, getUserByService } = useAuthStore();
+  const { user, setMicrosoftUserId, setObwbUser, getServiceToken } = useAuthStore();
 
-  // Get OBWB user specifically
-  const obwbUser = getUserByService('obwb');
-  const microsoftUserId = obwbUser?.microsoft_user_id || user?.microsoft_user_id;
+  // Get OBWB user data from API
+  const { data: obwbUser, isLoading: obwbUserLoading, error: obwbUserError } = useObwbUser();
+  
+  // Get microsoft_user_id from OBWB user
+  const microsoftUserId = obwbUser?.microsoft_user_id;
 
   const [connectionStatus, setConnectionStatus] =
     useState<{ connected: boolean; email?: string; user_id?: string } | null>(null);
@@ -131,11 +134,43 @@ export default function ConnectEmailPage() {
   };
 
   useEffect(() => {
-    if (user?.id) {
+    if (obwbUser?.microsoft_user_id) {
       getConnectionStatus();
+    } else if (!obwbUserLoading && obwbUser) {
+      // OBWB user loaded but no microsoft_user_id
+      setIsInitialLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, user?.microsoft_user_id]);
+  }, [obwbUser?.microsoft_user_id, obwbUserLoading]);
+
+  // Show loading if OBWB user is still loading
+  if (obwbUserLoading || isInitialLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mx-auto mb-4" />
+        <p className="text-muted-foreground">
+          {obwbUserLoading ? "Loading OBWB user data..." : "Loading connection status..."}
+        </p>
+      </div>
+    );
+  }
+
+  // Show error if OBWB user failed to load
+  if (obwbUserError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Card className="max-w-md bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800">
+          <CardHeader>
+            <CardTitle className="text-sm text-red-800 dark:text-red-300">OBWB Access Error</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-red-700 dark:text-red-400">
+            <p>Failed to load OBWB user data. Please check your OBWB service access.</p>
+            <p className="mt-2 text-xs">Error: {obwbUserError?.message || 'Unknown error'}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -165,8 +200,10 @@ export default function ConnectEmailPage() {
         <CardContent className="text-xs text-yellow-700 dark:text-yellow-400">
           <div>Dashboard User ID: {user?.id}</div>
           <div>Dashboard Microsoft User ID: {user?.microsoft_user_id || 'Not set'}</div>
-          <div>OBWB User ID: {obwbUser?.id || 'Not set'}</div>
-          <div>OBWB Microsoft User ID: {obwbUser?.microsoft_user_id || 'Not set'}</div>
+          <div>OBWB API Loading: {obwbUserLoading ? 'Yes' : 'No'}</div>
+          <div>OBWB API Error: {obwbUserError ? 'Yes' : 'No'}</div>
+          <div>OBWB User ID: {obwbUser?.id || 'Not available'}</div>
+          <div>OBWB Microsoft User ID: {obwbUser?.microsoft_user_id || 'Not available'}</div>
           <div>Used Microsoft User ID: {microsoftUserId || 'Not available'}</div>
           <div>Connection Status: {connectionStatus ? 'Connected' : 'Not Connected'}</div>
           <div>OBWB Token: {getServiceToken('obwb') ? 'Available' : 'Not Available'}</div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuthStore } from "@/lib/store";
+import { useObwbUser } from "@/lib/hooks/use-auth";
 import { emailAPI } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail } from "lucide-react";
@@ -20,8 +20,9 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export default function EmailsPage() {
-  const { userInServices } = useAuthStore();
-  const user = userInServices?.find(u => u.service === 'obwb');
+  // Get OBWB user data from API
+  const { data: obwbUser } = useObwbUser();
+  const microsoftUserId = obwbUser?.microsoft_user_id;
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -92,8 +93,6 @@ export default function EmailsPage() {
     router.replace(`?${params.toString()}`, { scroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, filters]);
-
-  const microsoftUserId = user?.microsoft_user_id;
 
   const {
     data: emailsData,

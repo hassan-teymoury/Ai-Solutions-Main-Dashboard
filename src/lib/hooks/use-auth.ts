@@ -1,7 +1,33 @@
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { useAuthStore } from "@/lib/store";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authAPI } from "@/lib/api";
+import { obwbAuthAPI } from "@/lib/api/obwb/auth";
+import { useAuthStore } from "@/lib/store";
 import type { LoginRequest } from "@/types";
+
+// Get OBWB user data hook
+export function useObwbUser() {
+  const { getServiceToken, setUsers } = useAuthStore();
+  const obwbToken = getServiceToken('obwb');
+
+  return useQuery({
+    queryKey: ["obwb-user"],
+    queryFn: async () => {
+      const obwbUser = await obwbAuthAPI.me();
+      // Store the OBWB user in our store
+      setUsers(obwbUser);
+      return obwbUser;
+    },
+    enabled: !!obwbToken, // Only run if we have OBWB token
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
+  });
+}
+
+// Get current user hook
+export function useCurrentUser() {
+  const { user } = useAuthStore();
+  return user;
+}
 
 // Validate user hook
 export function useValidateUser() {
