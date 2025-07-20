@@ -19,7 +19,11 @@ export default function ConnectEmailPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState("");
-  const { user, setMicrosoftUserId, setObwbUser, getServiceToken } = useAuthStore();
+  const { user, setMicrosoftUserId, setObwbUser, getServiceToken, getUserByService } = useAuthStore();
+
+  // Get OBWB user specifically
+  const obwbUser = getUserByService('obwb');
+  const microsoftUserId = obwbUser?.microsoft_user_id || user?.microsoft_user_id;
 
   const [connectionStatus, setConnectionStatus] =
     useState<{ connected: boolean; email?: string; user_id?: string } | null>(null);
@@ -57,13 +61,13 @@ export default function ConnectEmailPage() {
 
   const handleReconnect = async () => {
     try {
-      if (!user?.id) {
-        toast.error("User ID not available");
+      if (!microsoftUserId) {
+        toast.error("Microsoft User ID not available");
         return;
       }
       
       const connectionStatus: EmailConnectionResponse = await emailAPI.connectEmail(
-        user.id.toString()
+        microsoftUserId
       );
       if (connectionStatus.connected) {
         // Set both main user microsoft_user_id and create/update OBWB user
@@ -91,12 +95,12 @@ export default function ConnectEmailPage() {
       setIsLoading(true);
       setError("");
       
-      if (!user?.microsoft_user_id) {
+      if (!microsoftUserId) {
         toast.error("Microsoft user ID not available");
         return;
       }
       
-      await emailAPI.disconnectEmail(user.microsoft_user_id);
+      await emailAPI.disconnectEmail(microsoftUserId);
       toast.success("Email disconnected successfully");
       setMicrosoftUserId('');
     } catch (error) {
@@ -159,12 +163,14 @@ export default function ConnectEmailPage() {
           <CardTitle className="text-sm text-yellow-800 dark:text-yellow-300">Debug Info</CardTitle>
         </CardHeader>
         <CardContent className="text-xs text-yellow-700 dark:text-yellow-400">
-          <div>User ID: {user?.id}</div>
-          <div>Microsoft User ID: {user?.microsoft_user_id || 'Not set'}</div>
-          <div>User Service: {user?.service}</div>
+          <div>Dashboard User ID: {user?.id}</div>
+          <div>Dashboard Microsoft User ID: {user?.microsoft_user_id || 'Not set'}</div>
+          <div>OBWB User ID: {obwbUser?.id || 'Not set'}</div>
+          <div>OBWB Microsoft User ID: {obwbUser?.microsoft_user_id || 'Not set'}</div>
+          <div>Used Microsoft User ID: {microsoftUserId || 'Not available'}</div>
           <div>Connection Status: {connectionStatus ? 'Connected' : 'Not Connected'}</div>
-          <div>OBWB Token: {useAuthStore.getState().getServiceToken('obwb') ? 'Available' : 'Not Available'}</div>
-          <div>Service Tokens Count: {useAuthStore.getState().userInServices?.length || 0}</div>
+          <div>OBWB Token: {getServiceToken('obwb') ? 'Available' : 'Not Available'}</div>
+          <div>Service Tokens Count: {useAuthStore.getState().service_tokens?.length || 0}</div>
         </CardContent>
       </Card>
 

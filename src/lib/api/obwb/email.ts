@@ -20,10 +20,10 @@ export const emailAPI = {
     }
   },
 
-  connectEmail: async (user_id: string): Promise<EmailConnectionResponse> => {
+  connectEmail: async (microsoft_user_id: string): Promise<EmailConnectionResponse> => {
     try {
       const response = await obwbAPI.post<EmailConnectionResponse>(
-        `/users/${user_id}/connect-email`
+        `/users/microsoft/${microsoft_user_id}/connect-email`
       );
       return response.data;
     } catch (error) {
@@ -43,7 +43,7 @@ export const emailAPI = {
   },
 
   getEmails: async (
-    user_id: string,
+    microsoft_user_id: string,
     options: {
       page?: number;
       limit?: number;
@@ -61,7 +61,7 @@ export const emailAPI = {
       });
 
       const response = await obwbAPI.get<EmailsResponse>(
-        `/users/${user_id}/emails?${params}`
+        `/users/microsoft/${microsoft_user_id}/emails?${params}`
       );
       return response.data;
     } catch (error) {
@@ -70,12 +70,12 @@ export const emailAPI = {
   },
 
   getEmailDetail: async (
-    user_id: string,
+    microsoft_user_id: string,
     email_id: string
   ): Promise<EmailDetailResponse> => {
     try {
       const response = await obwbAPI.get<EmailDetailResponse>(
-        `/users/${user_id}/emails/${email_id}`
+        `/users/microsoft/${microsoft_user_id}/emails/${email_id}`
       );
       return response.data;
     } catch (error) {
@@ -84,13 +84,13 @@ export const emailAPI = {
   },
 
   getConversations: async (
-    user_id: string,
+    microsoft_user_id: string,
     page: number = 1,
     limit: number = 10
   ): Promise<ConversationsResponse> => {
     try {
       const response = await obwbAPI.get<ConversationsResponse>(
-        `/users/${user_id}/conversations?page=${page}&limit=${limit}`
+        `/users/microsoft/${microsoft_user_id}/conversations?page=${page}&limit=${limit}`
       );
       return response.data;
     } catch (error) {
@@ -99,7 +99,7 @@ export const emailAPI = {
   },
 
   getFollowUpEmails: async (
-    user_id: string,
+    microsoft_user_id: string,
     page: number = 1,
     limit: number = 10,
     filters?: Record<string, any>
@@ -112,7 +112,7 @@ export const emailAPI = {
       });
 
       const response = await obwbAPI.get<FollowUpEmailsResponse>(
-        `/users/${user_id}/follow-up-emails?${params}`
+        `/users/microsoft/${microsoft_user_id}/follow-up-emails?${params}`
       );
       return response.data;
     } catch (error) {
@@ -142,9 +142,9 @@ export const emailAPI = {
     }
   },
 
-  markEmailAsRead: async (user_id: string, email_id: string): Promise<void> => {
+  markEmailAsRead: async (microsoft_user_id: string, email_id: string): Promise<void> => {
     try {
-      await obwbAPI.patch(`/users/${user_id}/emails/${email_id}/read`);
+      await obwbAPI.patch(`/users/microsoft/${microsoft_user_id}/emails/${email_id}/read`);
     } catch (error) {
       // Fail silently for mark as read
       console.error('Failed to mark email as read:', error);

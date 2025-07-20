@@ -22,7 +22,8 @@ export default function EmailDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { getUserByService } = useAuthStore();
-  const user = getUserByService('obwb')
+  const user = getUserByService('obwb');
+  const microsoftUserId = user?.microsoft_user_id;
   const emailId = params?.id as string;
   const queryClient = useQueryClient();
 
@@ -34,19 +35,19 @@ export default function EmailDetailPage() {
   } = useQuery({
     queryKey: ["email", emailId],
     queryFn: () =>
-      emailAPI.getEmailDetail(user?.id?.toString() || "", emailId),
-    enabled: !!emailId,
+      emailAPI.getEmailDetail(microsoftUserId || "", emailId),
+    enabled: !!emailId && !!microsoftUserId,
   });
 
   useEffect(() => {
-    if (email && !email.is_read && user?.microsoft_user_id && emailId) {
-      emailAPI.markEmailAsRead(user.id.toString(), emailId)
+    if (email && !email.is_read && microsoftUserId && emailId) {
+      emailAPI.markEmailAsRead(microsoftUserId, emailId)
         .then(() => {
-          queryClient.invalidateQueries({ queryKey: ["emails", user.microsoft_user_id], exact: false });
+          queryClient.invalidateQueries({ queryKey: ["emails", microsoftUserId], exact: false });
         })
         .catch(() => {});
     }
-  }, [email, user?.microsoft_user_id, emailId, queryClient]);
+  }, [email, microsoftUserId, emailId, queryClient]);
 
   if (isLoading) {
     return (
