@@ -192,25 +192,6 @@ export default function ConnectEmailPage() {
         </Card>
       )}
 
-      {/* Debug Info - Remove in production */}
-      <Card className="max-w-md bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800">
-        <CardHeader>
-          <CardTitle className="text-sm text-yellow-800 dark:text-yellow-300">Debug Info</CardTitle>
-        </CardHeader>
-        <CardContent className="text-xs text-yellow-700 dark:text-yellow-400">
-          <div>Dashboard User ID: {user?.id}</div>
-          <div>Dashboard Microsoft User ID: {user?.microsoft_user_id || 'Not set'}</div>
-          <div>OBWB API Loading: {obwbUserLoading ? 'Yes' : 'No'}</div>
-          <div>OBWB API Error: {obwbUserError ? 'Yes' : 'No'}</div>
-          <div>OBWB User ID: {obwbUser?.id || 'Not available'}</div>
-          <div>OBWB Microsoft User ID: {obwbUser?.microsoft_user_id || 'Not available'}</div>
-          <div>Used Microsoft User ID: {microsoftUserId || 'Not available'}</div>
-          <div>Connection Status: {connectionStatus ? 'Connected' : 'Not Connected'}</div>
-          <div>OBWB Token: {getServiceToken('obwb') ? 'Available' : 'Not Available'}</div>
-          <div>Service Tokens Count: {useAuthStore.getState().service_tokens?.length || 0}</div>
-        </CardContent>
-      </Card>
-
       <Card className="max-w-md">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">

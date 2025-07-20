@@ -18,8 +18,7 @@ export const AIServices = {
     user_id: string,
     generate_response_request: GenerateResponseRequest
   ): Promise<AIResponseResponse> => {
-    const response = await api.post(`/ai/generate-response`, {
-      user_id,
+    const response = await api.post(`/ai/${user_id}/generate-response`, {
       ...generate_response_request,
     });
     return response.data;
@@ -29,17 +28,19 @@ export const AIServices = {
     user_id: string,
     filters: AIResponsesFilters = {}
   ): Promise<ResponsesResponse> => {
-    const params: Record<string, string | number> = {
-      user_id,
-      page_num: filters.page_num || 1,
-      page_size: Math.min(filters.page_size || 20, 100), // Ensure max 100
-    };
-
+    const params = new URLSearchParams();
+    
+    // Add pagination
+    params.append('page_num', String(filters.page_num || 1));
+    params.append('page_size', String(Math.min(filters.page_size || 20, 100)));
+    
+    // Add optional filters
     if (filters.conversation_id) {
-      params.conversation_id = filters.conversation_id;
+      params.append('conversation_id', filters.conversation_id);
     }
 
-    const response = await api.get(`/ai/responses`, { params });
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const response = await api.get(`/ai/${user_id}/responses${queryString}`);
     return response.data;
   },
 
@@ -47,9 +48,7 @@ export const AIServices = {
     user_id: string,
     response_id: string
   ): Promise<AIResponseResponse> => {
-    const response = await api.get(`/ai/responses/${response_id}`, {
-      params: { user_id }
-    });
+    const response = await api.get(`/ai/${user_id}/responses/${response_id}`);
     return response.data;
   },
 
@@ -57,17 +56,13 @@ export const AIServices = {
     user_id: string,
     response_id: string
   ): Promise<void> => {
-    await api.delete(`/ai/responses/${response_id}`, {
-      data: { user_id }
-    });
+    await api.delete(`/ai/${user_id}/responses/${response_id}`);
   },
 
   getAiUsageStatistics: async (
     user_id: string
   ): Promise<AIUsageStatisticsResponse> => {
-    const response = await api.get(`/ai/stats`, {
-      params: { user_id }
-    });
+    const response = await api.get(`/ai/${user_id}/stats`);
     return response.data;
   },
 
@@ -75,9 +70,7 @@ export const AIServices = {
     user_id: string,
     conversation_id: string
   ): Promise<void> => {
-    await api.post(`/ai/clear-cache/${conversation_id}`, {
-      user_id
-    });
+    await api.post(`/ai/${user_id}/clear-cache/${conversation_id}`);
   },
 
   generateDigest: async (
@@ -85,8 +78,7 @@ export const AIServices = {
     digest_type: DigestType,
     date_range?: string
   ): Promise<GenerateDigestResponse> => {
-    const response = await api.post(`/ai/generate-digest`, {
-      user_id,
+    const response = await api.post(`/ai/${user_id}/generate-digest`, {
       digest_type,
       date_range,
     });
@@ -98,8 +90,7 @@ export const AIServices = {
     conversation_id: string
   ): Promise<AnalyzeConversationResponse> => {
     const response = await api.post(
-      `/ai/analyze-conversation/${conversation_id}`,
-      { user_id }
+      `/ai/${user_id}/analyze-conversation/${conversation_id}`
     );
     return response.data;
   },
@@ -108,19 +99,19 @@ export const AIServices = {
     user_id: string,
     filters: FollowUpRequiredEmailsFilters = {}
   ): Promise<FollowUpRequiredEmailsResponse> => {
-    const params: Record<string, string | number> = {
-      user_id,
-      page_num: filters.page_num || 1,
-      page_size: Math.min(filters.page_size || 20, 100), // Ensure max 100
-    };
-
+    const params = new URLSearchParams();
+    
+    // Add pagination
+    params.append('page_num', String(filters.page_num || 1));
+    params.append('page_size', String(Math.min(filters.page_size || 20, 100)));
+    
+    // Add optional filters
     if (filters.priority) {
-      params.priority = filters.priority;
+      params.append('priority', filters.priority);
     }
 
-    const response = await api.get(`/ai/follow-up-required`, {
-      params,
-    });
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const response = await api.get(`/ai/${user_id}/follow-up-emails${queryString}`);
     return response.data;
   },
 
@@ -128,9 +119,7 @@ export const AIServices = {
     user_id: string,
     email_id: string
   ): Promise<RelatedEmailsResponse> => {
-    const response = await api.get(`/ai/related-emails/${email_id}`, {
-      params: { user_id }
-    });
+    const response = await api.get(`/ai/${user_id}/related-emails/${email_id}`);
     return response.data;
   },
 };

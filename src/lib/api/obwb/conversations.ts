@@ -15,14 +15,16 @@ export const conversationsAPI = {
     filters: ConversationFilters = {}
   ): Promise<ConversationResponse> => {
     try {
-      const response = await api.get<ConversationResponse>(
-        `/conversations`,
-        {
-          params: {
-            microsoft_user_id,
-            ...filters,
-          },
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
         }
+      });
+
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+      const response = await api.get<ConversationResponse>(
+        `/conversations/${microsoft_user_id}${queryString}`
       );
       return response.data;
     } catch (error) {
@@ -41,14 +43,16 @@ export const conversationsAPI = {
     filters: ConversationDetailFilters = {}
   ): Promise<ConversationDetailResponse> => {
     try {
-      const response = await api.get<ConversationDetailResponse>(
-        `/conversations/${conversation_id}`,
-        {
-          params: {
-            microsoft_user_id,
-            ...filters,
-          },
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
         }
+      });
+
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+      const response = await api.get<ConversationDetailResponse>(
+        `/conversations/${microsoft_user_id}/${conversation_id}${queryString}`
       );
       return response.data;
     } catch (error) {
@@ -67,12 +71,7 @@ export const conversationsAPI = {
   ): Promise<EmailResponse> => {
     try {
       const response = await api.get<EmailResponse>(
-        `/conversations/${conversation_id}/related-emails`,
-        {
-          params: {
-            microsoft_user_id,
-          },
-        }
+        `/conversations/${microsoft_user_id}/${conversation_id}/related-emails`
       );
       return response.data;
     } catch (error) {
