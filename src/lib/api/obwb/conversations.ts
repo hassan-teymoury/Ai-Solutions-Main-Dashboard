@@ -16,9 +16,12 @@ export const conversationsAPI = {
   ): Promise<ConversationResponse> => {
     try {
       const response = await api.get<ConversationResponse>(
-        `/conversations/${microsoft_user_id}`,
+        `/conversations`,
         {
-          params: filters,
+          params: {
+            microsoft_user_id,
+            ...filters,
+          },
         }
       );
       return response.data;
@@ -39,9 +42,12 @@ export const conversationsAPI = {
   ): Promise<ConversationDetailResponse> => {
     try {
       const response = await api.get<ConversationDetailResponse>(
-        `/conversations/${microsoft_user_id}/${conversation_id}`,
+        `/conversations/${conversation_id}`,
         {
-          params: filters,
+          params: {
+            microsoft_user_id,
+            ...filters,
+          },
         }
       );
       return response.data;
@@ -61,7 +67,12 @@ export const conversationsAPI = {
   ): Promise<EmailResponse> => {
     try {
       const response = await api.get<EmailResponse>(
-        `/conversations/${microsoft_user_id}/${conversation_id}/related-emails`
+        `/conversations/${conversation_id}/related-emails`,
+        {
+          params: {
+            microsoft_user_id,
+          },
+        }
       );
       return response.data;
     } catch (error) {

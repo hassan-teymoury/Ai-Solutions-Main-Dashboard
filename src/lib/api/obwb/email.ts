@@ -22,23 +22,63 @@ export const emailAPI = {
 
   connectEmail: async (microsoft_user_id: string): Promise<EmailConnectionResponse> => {
     try {
+      // Try the direct endpoint first
       const response = await obwbAPI.post<EmailConnectionResponse>(
-        `/users/microsoft/${microsoft_user_id}/connect-email`
+        `/emails/connect`,
+        { microsoft_user_id }
       );
       return response.data;
     } catch (error) {
-      throw error;
+      // If that fails, try alternative endpoint
+      try {
+        const response = await obwbAPI.post<EmailConnectionResponse>(
+          `/connect-email`,
+          { microsoft_user_id }
+        );
+        return response.data;
+      } catch {
+        // If both fail, try another alternative
+        try {
+          const response = await obwbAPI.post<EmailConnectionResponse>(
+            `/auth/connect-email`,
+            { microsoft_user_id }
+          );
+          return response.data;
+        } catch {
+          throw error; // Return original error
+        }
+      }
     }
   },
 
   disconnectEmail: async (microsoft_user_id: string): Promise<EmailDisconnectResponse> => {
     try {
+      // Try the direct endpoint first
       const response = await obwbAPI.delete<EmailDisconnectResponse>(
-        `/users/microsoft/${microsoft_user_id}/disconnect-email`
+        `/emails/disconnect`,
+        { data: { microsoft_user_id } }
       );
       return response.data;
     } catch (error) {
-      throw error;
+      // If that fails, try alternative endpoint
+      try {
+        const response = await obwbAPI.delete<EmailDisconnectResponse>(
+          `/disconnect-email`,
+          { data: { microsoft_user_id } }
+        );
+        return response.data;
+      } catch {
+        // If both fail, try another alternative
+        try {
+          const response = await obwbAPI.delete<EmailDisconnectResponse>(
+            `/auth/disconnect-email`,
+            { data: { microsoft_user_id } }
+          );
+          return response.data;
+        } catch {
+          throw error; // Return original error
+        }
+      }
     }
   },
 
@@ -55,13 +95,14 @@ export const emailAPI = {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
+        microsoft_user_id,
         ...Object.fromEntries(
           Object.entries(filters).map(([key, value]) => [key, String(value)])
         ),
       });
 
       const response = await obwbAPI.get<EmailsResponse>(
-        `/users/microsoft/${microsoft_user_id}/emails?${params}`
+        `/emails?${params}`
       );
       return response.data;
     } catch (error) {
@@ -75,7 +116,7 @@ export const emailAPI = {
   ): Promise<EmailDetailResponse> => {
     try {
       const response = await obwbAPI.get<EmailDetailResponse>(
-        `/users/microsoft/${microsoft_user_id}/emails/${email_id}`
+        `/emails/${email_id}?microsoft_user_id=${microsoft_user_id}`
       );
       return response.data;
     } catch (error) {
@@ -90,7 +131,7 @@ export const emailAPI = {
   ): Promise<ConversationsResponse> => {
     try {
       const response = await obwbAPI.get<ConversationsResponse>(
-        `/users/microsoft/${microsoft_user_id}/conversations?page=${page}&limit=${limit}`
+        `/conversations?microsoft_user_id=${microsoft_user_id}&page=${page}&limit=${limit}`
       );
       return response.data;
     } catch (error) {
@@ -106,13 +147,14 @@ export const emailAPI = {
   ): Promise<FollowUpEmailsResponse> => {
     try {
       const params = new URLSearchParams({
+        microsoft_user_id,
         page: page.toString(),
         limit: limit.toString(),
         ...filters,
       });
 
       const response = await obwbAPI.get<FollowUpEmailsResponse>(
-        `/users/microsoft/${microsoft_user_id}/follow-up-emails?${params}`
+        `/follow-up-emails?${params}`
       );
       return response.data;
     } catch (error) {
@@ -134,7 +176,8 @@ export const emailAPI = {
   syncEmails: async (microsoft_user_id: string): Promise<{ emails_fetched: number; emails_saved: number }> => {
     try {
       const response = await obwbAPI.post<{ emails_fetched: number; emails_saved: number }>(
-        `/users/microsoft/${microsoft_user_id}/sync-emails`
+        `/emails/sync`,
+        { microsoft_user_id }
       );
       return response.data;
     } catch (error) {
@@ -144,7 +187,10 @@ export const emailAPI = {
 
   markEmailAsRead: async (microsoft_user_id: string, email_id: string): Promise<void> => {
     try {
-      await obwbAPI.patch(`/users/microsoft/${microsoft_user_id}/emails/${email_id}/read`);
+      await obwbAPI.patch(
+        `/emails/${email_id}/read`,
+        { microsoft_user_id }
+      );
     } catch (error) {
       // Fail silently for mark as read
       console.error('Failed to mark email as read:', error);
