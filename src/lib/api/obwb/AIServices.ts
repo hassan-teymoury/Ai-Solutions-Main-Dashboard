@@ -1,17 +1,17 @@
-import {
+import { obwbAPI as api } from "../base";
+import type {
+  DigestType,
+  FollowUpRequiredEmailsResponse,
+  FollowUpRequiredEmailsFilters,
+  GenerateResponseRequest,
   AIResponseResponse,
   AIResponsesFilters,
-  AIUsageStatisticsResponse,
-  AnalyzeConversationResponse,
-  DigestType,
-  FollowUpRequiredEmailsFilters,
-  FollowUpRequiredEmailsResponse,
-  GenerateDigestResponse,
-  GenerateResponseRequest,
-  RelatedEmailsResponse,
   ResponsesResponse,
+  AIUsageStatisticsResponse,
+  GenerateDigestResponse,
+  AnalyzeConversationResponse,
+  RelatedEmailsResponse,
 } from "@/types/AIServices";
-import { dashboardAuthAPI as api } from "../base";
 
 export const AIServices = {
   generateResponse: async (

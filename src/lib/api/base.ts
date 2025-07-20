@@ -1,18 +1,27 @@
 import { createAPI } from "./createAPI";
+import { useAuthStore } from "@/lib/store";
 
-const AUTH_STORAGE_KEY = "auth-storage";
-
-// Dashboard tokens (main login)
-const getDashboardTokens = () => {
-  try {
-    const auth = JSON.parse(localStorage.getItem(AUTH_STORAGE_KEY) || "{}");
-    return auth?.state || {};
-  } catch {
-    return {};
-  }
-};
-
+// Dashboard API for main authentication and user management
 export const dashboardAuthAPI = createAPI(
   "https://api-dashboard-finitx.darkube.app",
-  getDashboardTokens
+  () => {
+    const { access_token, refresh_token } = useAuthStore.getState();
+    return { 
+      access_token: access_token || undefined, 
+      refresh_token: refresh_token || undefined 
+    };
+  }
+);
+
+// OBWB API for email management services
+export const obwbAPI = createAPI(
+  "https://obwbapi.finitx.com",
+  () => {
+    const { getServiceToken } = useAuthStore.getState();
+    const obwbToken = getServiceToken('obwb');
+    return { 
+      access_token: obwbToken || undefined, 
+      refresh_token: undefined 
+    };
+  }
 );

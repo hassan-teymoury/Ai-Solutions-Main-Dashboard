@@ -1,5 +1,5 @@
 import axios from "axios";
-import { dashboardAuthAPI as api } from "../base";
+import { obwbAPI as api } from "../base";
 import type {
   ConversationResponse,
   ConversationFilters,

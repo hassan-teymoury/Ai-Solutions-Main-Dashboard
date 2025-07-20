@@ -19,11 +19,24 @@ export default function ConnectEmailPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState("");
-  const { user, setMicrosoftUserId, setObwbUser } = useAuthStore();
+  const { user, setMicrosoftUserId, setObwbUser, getServiceToken } = useAuthStore();
 
   const [connectionStatus, setConnectionStatus] =
     useState<{ connected: boolean; email?: string; user_id?: string } | null>(null);
+
+  // Check if user has OBWB access
+  const hasObwbAccess = () => {
+    const obwbToken = getServiceToken('obwb');
+    return !!obwbToken;
+  };
+    
   const handleConnectEmail = async () => {
+    // Check OBWB access first
+    if (!hasObwbAccess()) {
+      setError("OBWB service access not available. Please contact support.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
@@ -36,7 +49,7 @@ export default function ConnectEmailPage() {
       // Redirect to the auth URL
       window.location.href = auth_url;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect email");
+      setError(err instanceof Error ? err.message : "Failed to get auth URL");
     } finally {
       setIsLoading(false);
     }
@@ -129,6 +142,17 @@ export default function ConnectEmailPage() {
         </p>
       </div>
 
+      {!hasObwbAccess() && (
+        <Card className="max-w-md bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800">
+          <CardHeader>
+            <CardTitle className="text-sm text-red-800 dark:text-red-300">Access Required</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-red-700 dark:text-red-400">
+            <p>OBWB service access is required to connect email accounts. Please contact your administrator to enable OBWB service access.</p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Debug Info - Remove in production */}
       <Card className="max-w-md bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800">
         <CardHeader>
@@ -138,7 +162,9 @@ export default function ConnectEmailPage() {
           <div>User ID: {user?.id}</div>
           <div>Microsoft User ID: {user?.microsoft_user_id || 'Not set'}</div>
           <div>User Service: {user?.service}</div>
-          <div>Connection Status: {connectionStatus?.connected ? 'Connected' : 'Not connected'}</div>
+          <div>Connection Status: {connectionStatus ? 'Connected' : 'Not Connected'}</div>
+          <div>OBWB Token: {useAuthStore.getState().getServiceToken('obwb') ? 'Available' : 'Not Available'}</div>
+          <div>Service Tokens Count: {useAuthStore.getState().userInServices?.length || 0}</div>
         </CardContent>
       </Card>
 

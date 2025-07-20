@@ -1,4 +1,4 @@
-import { dashboardAuthAPI } from "../base";
+import { obwbAPI } from "../base";
 import {
   EmailConnectionResponse,
   EmailDisconnectResponse,
@@ -13,7 +13,7 @@ import { useAuthStore } from "@/lib/store";
 export const emailAPI = {
   getAuthUrl: async (): Promise<AuthUrlResponse> => {
     try {
-      const response = await dashboardAuthAPI.get<AuthUrlResponse>("/emails/auth-url");
+      const response = await obwbAPI.get<AuthUrlResponse>("/emails/auth-url");
       return response.data;
     } catch (error) {
       throw error;
@@ -22,7 +22,7 @@ export const emailAPI = {
 
   connectEmail: async (user_id: string): Promise<EmailConnectionResponse> => {
     try {
-      const response = await dashboardAuthAPI.post<EmailConnectionResponse>(
+      const response = await obwbAPI.post<EmailConnectionResponse>(
         `/users/${user_id}/connect-email`
       );
       return response.data;
@@ -33,7 +33,7 @@ export const emailAPI = {
 
   disconnectEmail: async (microsoft_user_id: string): Promise<EmailDisconnectResponse> => {
     try {
-      const response = await dashboardAuthAPI.delete<EmailDisconnectResponse>(
+      const response = await obwbAPI.delete<EmailDisconnectResponse>(
         `/users/microsoft/${microsoft_user_id}/disconnect-email`
       );
       return response.data;
@@ -60,7 +60,7 @@ export const emailAPI = {
         ),
       });
 
-      const response = await dashboardAuthAPI.get<EmailsResponse>(
+      const response = await obwbAPI.get<EmailsResponse>(
         `/users/${user_id}/emails?${params}`
       );
       return response.data;
@@ -74,7 +74,7 @@ export const emailAPI = {
     email_id: string
   ): Promise<EmailDetailResponse> => {
     try {
-      const response = await dashboardAuthAPI.get<EmailDetailResponse>(
+      const response = await obwbAPI.get<EmailDetailResponse>(
         `/users/${user_id}/emails/${email_id}`
       );
       return response.data;
@@ -89,7 +89,7 @@ export const emailAPI = {
     limit: number = 10
   ): Promise<ConversationsResponse> => {
     try {
-      const response = await dashboardAuthAPI.get<ConversationsResponse>(
+      const response = await obwbAPI.get<ConversationsResponse>(
         `/users/${user_id}/conversations?page=${page}&limit=${limit}`
       );
       return response.data;
@@ -111,7 +111,7 @@ export const emailAPI = {
         ...filters,
       });
 
-      const response = await dashboardAuthAPI.get<FollowUpEmailsResponse>(
+      const response = await obwbAPI.get<FollowUpEmailsResponse>(
         `/users/${user_id}/follow-up-emails?${params}`
       );
       return response.data;
@@ -133,7 +133,7 @@ export const emailAPI = {
 
   syncEmails: async (microsoft_user_id: string): Promise<{ emails_fetched: number; emails_saved: number }> => {
     try {
-      const response = await dashboardAuthAPI.post<{ emails_fetched: number; emails_saved: number }>(
+      const response = await obwbAPI.post<{ emails_fetched: number; emails_saved: number }>(
         `/users/microsoft/${microsoft_user_id}/sync-emails`
       );
       return response.data;
@@ -144,7 +144,7 @@ export const emailAPI = {
 
   markEmailAsRead: async (user_id: string, email_id: string): Promise<void> => {
     try {
-      await dashboardAuthAPI.patch(`/users/${user_id}/emails/${email_id}/read`);
+      await obwbAPI.patch(`/users/${user_id}/emails/${email_id}/read`);
     } catch (error) {
       // Fail silently for mark as read
       console.error('Failed to mark email as read:', error);
