@@ -38,7 +38,11 @@ export function useLogin() {
       console.log("Setting user data in store...");
       
       // Update store with user data
-      setUser({...data.user, service: 'dashboard'});
+      setUser({
+        ...data.user, 
+        service: 'dashboard',
+        microsoft_user_id: data.user.microsoft_user_id || null
+      });
       setAccessToken(data.access_token);
       setRefreshToken(data.refresh_token);
       setServiceTokens(data.service_tokens || []);
@@ -72,7 +76,11 @@ export function useSignup() {
     },
     onSuccess: (data) => {
       // Update Zustand store
-      setUser({...data.user, service: "dashboard"});
+      setUser({
+        ...data.user, 
+        service: "dashboard",
+        microsoft_user_id: data.user.microsoft_user_id || null
+      });
       setAccessToken(data.access_token);
       setRefreshToken(data.refresh_token);
 

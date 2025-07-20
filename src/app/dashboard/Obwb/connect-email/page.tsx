@@ -19,7 +19,7 @@ export default function ConnectEmailPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [error, setError] = useState("");
-  const { user, setMicrosoftUserId } = useAuthStore();
+  const { user, setMicrosoftUserId, setObwbUser } = useAuthStore();
 
   const [connectionStatus, setConnectionStatus] =
     useState<{ connected: boolean; email?: string; user_id?: string } | null>(null);
@@ -53,7 +53,9 @@ export default function ConnectEmailPage() {
         user.id.toString()
       );
       if (connectionStatus.connected) {
+        // Set both main user microsoft_user_id and create/update OBWB user
         setMicrosoftUserId(connectionStatus.microsoft_user_id);
+        setObwbUser(connectionStatus.microsoft_user_id);
         toast.success("Email connected successfully");
         // Update local state with new connection status
         setConnectionStatus({
@@ -126,6 +128,19 @@ export default function ConnectEmailPage() {
           Link your email account to get started
         </p>
       </div>
+
+      {/* Debug Info - Remove in production */}
+      <Card className="max-w-md bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800">
+        <CardHeader>
+          <CardTitle className="text-sm text-yellow-800 dark:text-yellow-300">Debug Info</CardTitle>
+        </CardHeader>
+        <CardContent className="text-xs text-yellow-700 dark:text-yellow-400">
+          <div>User ID: {user?.id}</div>
+          <div>Microsoft User ID: {user?.microsoft_user_id || 'Not set'}</div>
+          <div>User Service: {user?.service}</div>
+          <div>Connection Status: {connectionStatus?.connected ? 'Connected' : 'Not connected'}</div>
+        </CardContent>
+      </Card>
 
       <Card className="max-w-md">
         <CardHeader>

@@ -88,22 +88,52 @@ export const useAuthStore = create<AuthStore>()(
 
       setHydrated: () => set({ hydrated: true, isLoading: false }),
       setMicrosoftUserId: (microsoft_user_id: string) => {
-        const { user } = get();
-        if (user) {
-          set({ 
-            user: { ...user, microsoft_user_id }
-          });
-        }
-        
-        const { userInServices } = get();
-        if (userInServices) {
-          const updatedUsers = userInServices.map((user) =>
+        set((state) => {
+          // Update main user if exists
+          const updatedUser = state.user ? { ...state.user, microsoft_user_id } : state.user;
+          
+          // Update userInServices array
+          const updatedUserInServices = state.userInServices?.map((user) =>
+            user.service === 'obwb' || user.service === 'dashboard'
+              ? { ...user, microsoft_user_id }
+              : user
+          ) || state.userInServices;
+
+          return {
+            user: updatedUser,
+            userInServices: updatedUserInServices,
+          };
+        });
+      },
+      
+      setObwbUser: (microsoft_user_id: string) => {
+        set((state) => {
+          // Create OBWB user based on main user if it doesn't exist
+          if (!state.userInServices?.find(u => u.service === 'obwb') && state.user) {
+            const obwbUser = {
+              ...state.user,
+              service: 'obwb',
+              microsoft_user_id,
+            };
+            
+            return {
+              userInServices: state.userInServices 
+                ? [...state.userInServices, obwbUser] 
+                : [obwbUser],
+            };
+          }
+          
+          // Update existing OBWB user
+          const updatedUserInServices = state.userInServices?.map((user) =>
             user.service === 'obwb'
               ? { ...user, microsoft_user_id }
               : user
-          );
-          set({ userInServices: updatedUsers });
-        }
+          ) || state.userInServices;
+
+          return {
+            userInServices: updatedUserInServices,
+          };
+        });
       },
     }),
     {

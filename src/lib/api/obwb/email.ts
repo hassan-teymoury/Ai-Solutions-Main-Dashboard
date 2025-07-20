@@ -146,7 +146,8 @@ export const emailAPI = {
     try {
       await dashboardAuthAPI.patch(`/users/${user_id}/emails/${email_id}/read`);
     } catch (error) {
-      throw error;
+      // Fail silently for mark as read
+      console.error('Failed to mark email as read:', error);
     }
   },
 }; 

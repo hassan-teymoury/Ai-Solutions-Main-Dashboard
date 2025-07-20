@@ -16,7 +16,7 @@ import { useAuthStore } from "@/lib/store";
 function AccessResultContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { setMicrosoftUserId } = useAuthStore();
+  const { setMicrosoftUserId, setObwbUser } = useAuthStore();
 
   const [status, setStatus] = useState<string | null>(null);
   const [syncedEmails, setSyncedEmails] = useState<string | null>(null);
@@ -32,11 +32,13 @@ function AccessResultContent() {
     setSyncedEmails(e);
     setUserEmail(ue);
     if (s === "success" && u) {
+      // Set both main user microsoft_user_id and create/update OBWB user
       setMicrosoftUserId(u);
+      setObwbUser(u);
     }
 
     setIsProcessing(false);
-  }, [searchParams, setMicrosoftUserId]);
+  }, [searchParams, setMicrosoftUserId, setObwbUser]);
 
   const handleViewEmails = () => {
     router.push("/dashboard/emails");

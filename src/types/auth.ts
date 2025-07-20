@@ -36,7 +36,7 @@ export interface AuthResponse {
     last_name: string;
     created_at: string;
     updated_at: string;
-    microsoft_user_id: string;
+    microsoft_user_id?: string | null; // Make this optional since it's set after OAuth
   };
   service_tokens: ServiceToken[];
 }
@@ -90,6 +90,7 @@ export interface AuthActions {
   setUsers: (user: User) => void;
   setHydrated: () => void;
   setMicrosoftUserId: (id: string) => void;
+  setObwbUser: (microsoft_user_id: string) => void;
   setAccessToken: (token: string) => void;
   setRefreshToken: (token: string) => void;
   updateTokens: (access: string, refresh: string) => void;
